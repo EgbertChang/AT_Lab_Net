@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F41D6D4E1FE22116000F0409 /* runloop.swift in Sources */ = {isa = PBXBuildFile; fileRef = F41D6D4D1FE22116000F0409 /* runloop.swift */; };
+		F445462B1FDFA0A1001E817E /* send_sketch1.swift in Sources */ = {isa = PBXBuildFile; fileRef = F445462A1FDFA0A1001E817E /* send_sketch1.swift */; };
 		F4BE2A1B1FDAC1E600FD08F0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4BE2A1A1FDAC1E600FD08F0 /* AppDelegate.swift */; };
 		F4BE2A1D1FDAC1E600FD08F0 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4BE2A1C1FDAC1E600FD08F0 /* ViewController.swift */; };
 		F4BE2A201FDAC1E600FD08F0 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F4BE2A1E1FDAC1E600FD08F0 /* Main.storyboard */; };
@@ -15,6 +17,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		F41D6D4D1FE22116000F0409 /* runloop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = runloop.swift; sourceTree = "<group>"; };
+		F445462A1FDFA0A1001E817E /* send_sketch1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = send_sketch1.swift; sourceTree = "<group>"; };
 		F4BE2A171FDAC1E600FD08F0 /* socket20171208.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = socket20171208.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F4BE2A1A1FDAC1E600FD08F0 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F4BE2A1C1FDAC1E600FD08F0 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -35,6 +39,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		F44546291FDFA034001E817E /* Message */ = {
+			isa = PBXGroup;
+			children = (
+				F445462A1FDFA0A1001E817E /* send_sketch1.swift */,
+				F41D6D4D1FE22116000F0409 /* runloop.swift */,
+			);
+			path = Message;
+			sourceTree = "<group>";
+		};
 		F4BE2A0E1FDAC1E500FD08F0 = {
 			isa = PBXGroup;
 			children = (
@@ -54,6 +67,7 @@
 		F4BE2A191FDAC1E600FD08F0 /* socket20171208 */ = {
 			isa = PBXGroup;
 			children = (
+				F44546291FDFA034001E817E /* Message */,
 				F4BE2A1A1FDAC1E600FD08F0 /* AppDelegate.swift */,
 				F4BE2A1C1FDAC1E600FD08F0 /* ViewController.swift */,
 				F4BE2A1E1FDAC1E600FD08F0 /* Main.storyboard */,
@@ -137,7 +151,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				F4BE2A1D1FDAC1E600FD08F0 /* ViewController.swift in Sources */,
+				F445462B1FDFA0A1001E817E /* send_sketch1.swift in Sources */,
 				F4BE2A1B1FDAC1E600FD08F0 /* AppDelegate.swift in Sources */,
+				F41D6D4E1FE22116000F0409 /* runloop.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
