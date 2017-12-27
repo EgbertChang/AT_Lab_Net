@@ -21,6 +21,7 @@ class send_sketch1 {
 extension send_sketch1 {
     private func createSocket() {
         
+        // let ipDeci: String = "121.43.183.17"
         let ipDeci: String = "127.0.0.1"
         let ipToCChars = ipDeci.cString(using: String.Encoding.ascii)
         // in_addr_t 一般为 32位的unsigned int
@@ -67,31 +68,60 @@ extension send_sketch1 {
             kCFAllocatorDefault,
             signaturePointer,
             3, {(socket, CFSocketCallBackType, addressData, serverMessage, info) in
-                // addressData: UnsafeRawPointer
-                //
+                // addressData: CFData
+                // serverMessage: UnsafeRawPointer
+                
                 if serverMessage != nil {
                     
+                    // buffer: UnsafeRawBufferPointer
+                    // UnsafeMutableRawBufferPointer
                     
-                    let buffer = UnsafeRawBufferPointer.init(start: serverMessage, count: 100)
-                    print(buffer.count)
-                    print(buffer.isEmpty)
-//                    print(buffer.sorted())
+                    let buffer = UnsafeRawBufferPointer.init(start: serverMessage, count: 1 << 5)
+                    // print(buffer.count)
                     
+                    // print(serverMessage!)         // 输出的内容形式如下：0x00006000000bc680
+                    // print(buffer.baseAddress!)    // 输出的内容形式如下：0x00006000000bc680
+                    
+                    // print(buffer.isEmpty)
+                    // print(buffer.sorted())
                     
                     let charArray = buffer.map({ (c) -> Character in
-                        print(Character.init(Unicode.Scalar(c)))
+                        // print(Character.init(Unicode.Scalar(c)))
                         return Character.init(Unicode.Scalar(c))
                     })
+                    
+                    let uint8Array = buffer.map({ (c) -> UInt8 in
+                        // print(Character.init(Unicode.Scalar(c)))
+                        return c
+                    })
                     print(charArray)
+//                    print(uint8Array)
+//                    print("\n")
                     
                     
-//                    print(buffer.baseAddress!)
-//                    print(buffer.baseAddress!)
-                    //let sendData = CFDataCreate(kCFAllocatorDefault, buffer, 20)!
+                    let buffer1 = UnsafeRawBufferPointer.init(start: serverMessage?.advanced(by: buffer.count), count: 1 << 5)
+                    let charArray1 = buffer1.map({ (c) -> Character in
+                        // print(Character.init(Unicode.Scalar(c)))
+                        return Character.init(Unicode.Scalar(c))
+                    })
+                    print(charArray1)
+//                    print("\n")
+                    
+                    let buffer2 = UnsafeRawBufferPointer.init(start: serverMessage?.advanced(by: 1 << 6), count: 1 << 5)
+                    let charArray2 = buffer2.map({ (c) -> Character in
+                        // print(Character.init(Unicode.Scalar(c)))
+                        return Character.init(Unicode.Scalar(c))
+                    })
+                    print(charArray2)
+                    print("\n")
+                    
+                    // print(buffer.baseAddress!)
+                    // print(buffer.baseAddress!)
+                    // let sendData = CFDataCreate(kCFAllocatorDefault, buffer, 20)!
                     
                     // print(String(buffer.first!))
-                    //print(String(buffer.last!))
-                    //print("\(buffer[2])")
+                    // print(String(buffer.last!))
+                    // print("\(buffer[2])")
                 }
                 
         }, nil, CFTimeInterval(3.0))
@@ -143,8 +173,6 @@ extension send_sketch1 {
 extension send_sketch1 {
     public func sendMessage() -> Void {
         self.createSocket()
-        print("Send Message ...")
+        // print("Send Message ...")    // 上一行socket的执行是异步的
     }
 }
-
-
