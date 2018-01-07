@@ -12,11 +12,69 @@ import Foundation
  * 在类中定义数据，在扩展中定义方法
  */
 class send_sketch1 {
+//    var stringArr: [String] = []
     var socket: CFSocket!
     var addressStruct: UnsafeMutablePointer<sockaddr_in> = UnsafeMutablePointer<sockaddr_in>.allocate(capacity: 1)
     
     init() {}
 }
+
+class message_box {
+    var messagePointer: UnsafeRawPointer!
+    var message: String!
+    
+    init(_ address: UnsafeRawPointer) {
+        self.messagePointer = address
+    }
+    
+    func showmessage() {
+        
+        // UnsafeRawPointer
+        var lengthData = Data.init()
+        // 不会超过14位数的，如果在16B中截取的数值不对的话，那这个传输的比特流数量大的惊人！
+        let bufferPointer = UnsafeRawBufferPointer.init(start: self.messagePointer.advanced(by: 48), count: 1 << 4)
+        var iterator = bufferPointer.makeIterator()
+        // print(Character.init(Unicode.Scalar(iterator.next()!)))
+        // print(Character.init(Unicode.Scalar(iterator.next()!)))
+        // print(Character.init(Unicode.Scalar(iterator.next()!)))
+        // print(Character.init(Unicode.Scalar(iterator.next()!)))
+        // print(Character.init(Unicode.Scalar(iterator.next()!)))
+        
+        while true {
+            let u = iterator.next()!
+            if u > 0 {
+                lengthData.append(u)
+            } else {
+                break
+            }
+        }
+        
+        // bufferPointer.filter { (u) in
+        //     lengthData.append(u)
+        //     if Character.init(Unicode.Scalar(u)) == "}" {
+        //         print("Enter here ")
+        //     }
+        //     print(Character.init(Unicode.Scalar(u)))
+        //     return true
+        // }
+        
+        // let singleMessageLength = Data.init(bytes: (self.messagePointer.advanced(by: 48)), count: 1 << 2)
+        let msg = String.init(data: lengthData, encoding: String.Encoding.utf8)
+        print(msg!)
+    }
+}
+
+var count: Int = 1
+
+func notificationFromServer(_ address: UnsafeRawPointer) {
+    count = count + 1
+    let message = message_box(address)
+    message.showmessage()
+    
+    // print(count)
+    // print("A new message coming ...")
+}
+
 
 extension send_sketch1 {
     private func createSocket() {
@@ -64,6 +122,10 @@ extension send_sketch1 {
         
         //UnsafeMutablePointer<CFSocketSignature>.allocate(capacity: 1)
         // kCFSocketConnectCallBack = 4,
+        
+        
+       
+        
         socket = CFSocketCreateConnectedToSocketSignature(
             kCFAllocatorDefault,
             signaturePointer,
@@ -72,64 +134,73 @@ extension send_sketch1 {
                 // serverMessage: UnsafeRawPointer
                 
                 if serverMessage != nil {
+                    notificationFromServer(serverMessage!)
+                    
+                    
+                    // init(UnsafeMutablePointer<Pointee>
+                    // let messagePointer = serverMessage
+                    // let data = Data.init(bytes: (serverMessage?.advanced(by: 48))!, count: 60)
+                    
+                    // print(data)  // 这里会输出byte的长度，类似如下的输出：20 bytes
+                    
+                    // let messageString = String.init(data: data, encoding: String.Encoding.utf8)
+                    // self.stringArr.append(messageString!)
+                    // print(self.stringArr)
+                    // print(messageString)
+                    
+                    // notificationFromServer("A new message coming ...")
+                    
+                    
+                    // print(messageString!)
+                    // print(messageString?.count)
+
+                    // let charArray = data.forEach({ (uint) in
+                    //    print(Character.init(Unicode.Scalar(uint)))
+                    // })
+                    
+                    
                     
                     // buffer: UnsafeRawBufferPointer
                     // UnsafeMutableRawBufferPointer
                     
-                    let buffer = UnsafeRawBufferPointer.init(start: serverMessage, count: 1 << 5)
-                    // print(buffer.count)
+                    // 申请1M的内存
+                    // let buffer = UnsafeRawBufferPointer.init(start: serverMessage, count: 1 << 8)
+                    // init(bytes: UnsafeRawPointer, count: Int)
+                    // init<SourceType>(buffer: UnsafeBufferPointer<SourceType>)
+                    // init<SourceType>(buffer: UnsafeMutableBufferPointer<SourceType>)
                     
+                    
+                    
+                    // print(buffer.count)
                     // print(serverMessage!)         // 输出的内容形式如下：0x00006000000bc680
                     // print(buffer.baseAddress!)    // 输出的内容形式如下：0x00006000000bc680
-                    
                     // print(buffer.isEmpty)
                     // print(buffer.sorted())
                     
-                    let charArray = buffer.map({ (c) -> Character in
+                    // let charArray = buffer.map({ (c) -> Character in
+                         // print(Character.init(Unicode.Scalar(c)))
+                         // return Character.init(Unicode.Scalar(c))
+                    // })
+                    // let uint8Array = buffer.map({ (c) -> UInt8 in
                         // print(Character.init(Unicode.Scalar(c)))
-                        return Character.init(Unicode.Scalar(c))
-                    })
+                        // return c
+                    // })
+                    // print(charArray)
+                    // print("\n")
+                    // print(uint8Array)
                     
-                    let uint8Array = buffer.map({ (c) -> UInt8 in
-                        // print(Character.init(Unicode.Scalar(c)))
-                        return c
-                    })
-                    print(charArray)
-//                    print(uint8Array)
-//                    print("\n")
-                    
-                    
-                    let buffer1 = UnsafeRawBufferPointer.init(start: serverMessage?.advanced(by: buffer.count), count: 1 << 5)
-                    let charArray1 = buffer1.map({ (c) -> Character in
-                        // print(Character.init(Unicode.Scalar(c)))
-                        return Character.init(Unicode.Scalar(c))
-                    })
-                    print(charArray1)
-//                    print("\n")
-                    
-                    let buffer2 = UnsafeRawBufferPointer.init(start: serverMessage?.advanced(by: 1 << 6), count: 1 << 5)
-                    let charArray2 = buffer2.map({ (c) -> Character in
-                        // print(Character.init(Unicode.Scalar(c)))
-                        return Character.init(Unicode.Scalar(c))
-                    })
-                    print(charArray2)
-                    print("\n")
-                    
-                    // print(buffer.baseAddress!)
-                    // print(buffer.baseAddress!)
-                    // let sendData = CFDataCreate(kCFAllocatorDefault, buffer, 20)!
-                    
-                    // print(String(buffer.first!))
-                    // print(String(buffer.last!))
-                    // print("\(buffer[2])")
                 }
-                
+            
         }, nil, CFTimeInterval(3.0))
+        
+        
         
         var array: [UInt8]  = [97, 98, 99, 100]
         let arrayPtr = UnsafeMutableBufferPointer<UInt8>(start: &array, count: array.count)
         var dataPtr = UnsafeMutablePointer<UInt8>.allocate(capacity: array.count)
         dataPtr = arrayPtr.baseAddress!
+        
+        
         let sendData = CFDataCreate(kCFAllocatorDefault, dataPtr, 10)!
         CFSocketSendData(socket, addressData, sendData, CFTimeInterval(3.0))
     
