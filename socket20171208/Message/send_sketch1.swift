@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 /*
  * 在类中定义数据，在扩展中定义方法
@@ -19,35 +20,99 @@ class send_sketch1 {
     init() {}
 }
 
+
+// 以下操作完全是基于正常的网络请求实现的操作
 class message_box {
     var messagePointer: UnsafeRawPointer!
     var message: String!
+    var messageContentOffset: Int!
+    var messageSize: Int!
+    var socket: CFSocket!
+    var address: CFData!
     
-    init(_ address: UnsafeRawPointer) {
-        self.messagePointer = address
+    init(_ pointer: UnsafeRawPointer, _ socket: CFSocket, _ addressData: CFData) {
+        self.messagePointer = pointer
+        self.socket = socket
+        self.address = addressData
     }
+    
     
     func showmessage() {
         
-        // UnsafeRawPointer
-        var lengthData = Data.init()
-        // 不会超过14位数的，如果在16B中截取的数值不对的话，那这个传输的比特流数量大的惊人！
-        let bufferPointer = UnsafeRawBufferPointer.init(start: self.messagePointer.advanced(by: 48), count: 1 << 4)
-        var iterator = bufferPointer.makeIterator()
+        // 如果数据超过了5位，那几乎是变态的数据量
+        // 这里也会出现问题，就是不知道服务器传输过来的byte流的长度。使用一个大致的缓冲区来接收这些数据，但不要做任何的解码操作
+        // 因为数据的不完整性会导致任何解码错误，将raw数据copy一部分到Data中，调用Data中相关方法摘取byte流的量
+        
+        let buffer = UnsafeRawBufferPointer.init(start: self.messagePointer, count: 48)
+        let bytelen = buffer[24...25]
+        let array = bytelen.map({ (c) -> UInt8 in
+            return c
+        })
+        var value : UInt32 = 0
+        let data = NSData(bytes: array, length: 2)
+        data.getBytes(&value, length: 2)
+        value = UInt32(littleEndian: value)
+        print(value) // 14
+        // return
+        
+        let fileData = Data.init(bytes: self.messagePointer.advanced(by: 48), count: Int(value))
+        // let sizeData = containSizeData.split(separator: 125, maxSplits: 1, omittingEmptySubsequences: true)[0].dropFirst()
+        print(fileData.count)
+        // 这里最好使用抛出异常的方式来实现
+        // let sizeInString = String.init(data: sizeData, encoding: String.Encoding.utf8)!
+        // print(sizeInString)
+        // self.messageContentOffset = sizeData.count + 2
+        // self.messageSize = Int(sizeInString)
+        // print(self.messageSizeOffset)
+        // print(Int(messageSizeString)!)
+        
+        // let messageData = Data.init(
+            // bytes: self.messagePointer.advanced(by: 48 + self.messageContentOffset),
+            // count: self.messageSize)
+        // let message = String.init(data: messageData, encoding: String.Encoding.utf8)
+        // print(message!)
+        
+        // print(NSHomeDirectory())
+        let directPath = "\(NSHomeDirectory())/Documents/Direct"
+        let imagePath = "\(directPath)/ikea.jpg"
+        let fileHandle = FileHandle.init(forWritingAtPath: imagePath)
+        fileHandle?.seekToEndOfFile()
+        
+        
+        // let image = UIImage.init(data: fileData)
+//         let imageData = UIImageJPEGRepresentation(image!, 1.0)
+        
+        
+        fileHandle?.write(fileData)
+        //fileHandle?.write(imageData!)
+        // let createImageStat = FileManager.default.createFile(atPath: imagePath, contents: UIImageJPEGRepresentation(image!, 1), attributes: nil)
+        // print(createImageStat)
+        
+        
+        
+        
+        //let createImageStat = FileManager.default.createFile(atPath: imagePath, contents: UIImageJPEGRepresentation(image!, 1.0), attributes: nil)
+        
+        // let createImageStat = FileManager.default.createFile(atPath: imagePath, contents: Data(), attributes: nil)
+        // print(createImageStat)
+        // self.responsToServer()
+        
+        
+        // var iterator = bufferPointer.makeIterator()
         // print(Character.init(Unicode.Scalar(iterator.next()!)))
         // print(Character.init(Unicode.Scalar(iterator.next()!)))
         // print(Character.init(Unicode.Scalar(iterator.next()!)))
         // print(Character.init(Unicode.Scalar(iterator.next()!)))
         // print(Character.init(Unicode.Scalar(iterator.next()!)))
         
-        while true {
-            let u = iterator.next()!
-            if u > 0 {
-                lengthData.append(u)
-            } else {
-                break
-            }
-        }
+//        while true {
+//            let u = iterator.next()!
+//            if u > 0 {
+//                lengthData.append(u)
+//            } else {
+//                break
+//            }
+//        }
         
         // bufferPointer.filter { (u) in
         //     lengthData.append(u)
@@ -59,16 +124,27 @@ class message_box {
         // }
         
         // let singleMessageLength = Data.init(bytes: (self.messagePointer.advanced(by: 48)), count: 1 << 2)
-        let msg = String.init(data: lengthData, encoding: String.Encoding.utf8)
-        print(msg!)
+//        let msg = String.init(data: lengthData, encoding: String.Encoding.utf8)
+//        print(msg!)
     }
+    
+    
+    func responsToServer() {
+        var array: [UInt8]  = [69, 110, 100]
+        let arrayPtr = UnsafeMutableBufferPointer<UInt8>(start: &array, count: array.count)
+        var dataPtr = UnsafeMutablePointer<UInt8>.allocate(capacity: array.count)
+        dataPtr = arrayPtr.baseAddress!
+        let sendData = CFDataCreate(kCFAllocatorDefault, dataPtr, 10)!
+        CFSocketSendData(self.socket, self.address, sendData, CFTimeInterval(3.0))
+    }
+    
 }
 
 var count: Int = 1
 
-func notificationFromServer(_ address: UnsafeRawPointer) {
+func notificationFromServer(_ address: UnsafeRawPointer, _ socket: CFSocket, _ addressData: CFData) {
     count = count + 1
-    let message = message_box(address)
+    let message = message_box(address, socket, addressData)
     message.showmessage()
     
     // print(count)
@@ -134,7 +210,7 @@ extension send_sketch1 {
                 // serverMessage: UnsafeRawPointer
                 
                 if serverMessage != nil {
-                    notificationFromServer(serverMessage!)
+                    notificationFromServer(serverMessage!, socket!, addressData!)
                     
                     
                     // init(UnsafeMutablePointer<Pointee>
@@ -164,12 +240,23 @@ extension send_sketch1 {
                     // UnsafeMutableRawBufferPointer
                     
                     // 申请1M的内存
-                    // let buffer = UnsafeRawBufferPointer.init(start: serverMessage, count: 1 << 8)
+                     let buffer = UnsafeRawBufferPointer.init(start: serverMessage, count: 18886)
                     // init(bytes: UnsafeRawPointer, count: Int)
                     // init<SourceType>(buffer: UnsafeBufferPointer<SourceType>)
                     // init<SourceType>(buffer: UnsafeMutableBufferPointer<SourceType>)
                     
-                    
+                    let bytelen = buffer[24...25]
+                    // print(bytelen)
+                    let array = bytelen.map({ (c) -> UInt8 in
+                        // print(c)
+                        return c
+                    })
+                    var value : UInt32 = 0
+                    let data = NSData(bytes: array, length: 2)
+                    data.getBytes(&value, length: 2)
+                    value = UInt32(littleEndian: value)
+                    // print(value) // 14
+
                     
                     // print(buffer.count)
                     // print(serverMessage!)         // 输出的内容形式如下：0x00006000000bc680
@@ -177,17 +264,18 @@ extension send_sketch1 {
                     // print(buffer.isEmpty)
                     // print(buffer.sorted())
                     
-                    // let charArray = buffer.map({ (c) -> Character in
+                     let charArray = buffer.map({ (c) -> Character in
+                          // print(Character.init(Unicode.Scalar(c)))
+                          return Character.init(Unicode.Scalar(c))
+                     })
+                     let uint8Array = buffer.map({ (c) -> UInt8 in
                          // print(Character.init(Unicode.Scalar(c)))
-                         // return Character.init(Unicode.Scalar(c))
-                    // })
-                    // let uint8Array = buffer.map({ (c) -> UInt8 in
-                        // print(Character.init(Unicode.Scalar(c)))
-                        // return c
-                    // })
-                    // print(charArray)
-                    // print("\n")
+                         return c
+                     })
+                     // print(charArray)
                     // print(uint8Array)
+//                    print("\n")
+                    print("\n")
                     
                 }
             
@@ -199,11 +287,10 @@ extension send_sketch1 {
         let arrayPtr = UnsafeMutableBufferPointer<UInt8>(start: &array, count: array.count)
         var dataPtr = UnsafeMutablePointer<UInt8>.allocate(capacity: array.count)
         dataPtr = arrayPtr.baseAddress!
-        
-        
         let sendData = CFDataCreate(kCFAllocatorDefault, dataPtr, 10)!
         CFSocketSendData(socket, addressData, sendData, CFTimeInterval(3.0))
     
+        
         // 获取输入源
         let runLoopSource = CFSocketCreateRunLoopSource(kCFAllocatorDefault, socket, CFIndex(10))
         // 将输入源添加到当前线程中的RunLoop中去
