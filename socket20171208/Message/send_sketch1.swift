@@ -89,8 +89,7 @@ class message_box {
         // print(createImageStat)
         
         
-        
-        
+
         //let createImageStat = FileManager.default.createFile(atPath: imagePath, contents: UIImageJPEGRepresentation(image!, 1.0), attributes: nil)
         
         // let createImageStat = FileManager.default.createFile(atPath: imagePath, contents: Data(), attributes: nil)
